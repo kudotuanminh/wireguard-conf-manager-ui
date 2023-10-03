@@ -1,55 +1,7 @@
-import { Form, Input, Modal, Radio } from "antd";
+import { Modal } from "antd";
 import { notificationSuccess, notificationError } from "./Notification";
 
-export async function newProfileModal() {
-    return new Promise((resolve, reject) => {
-        Modal.confirm({
-            title: "New Profile",
-            okText: "Create",
-            centered: true,
-            width: 500,
-            maskClosable: true,
-            onOk() {
-                setTimeout(resolve, 1000);
-                return new Promise((resolve) => {
-                    setTimeout(resolve, 1000);
-                });
-            },
-            onCancel() {
-                reject();
-            },
-            // content: (
-            //     <Form form={form} layout="vertical">
-            //         <Form.Item
-            //             label="Title"
-            //             name="title"
-            //             rules={[
-            //                 {
-            //                     required: true,
-            //                     message:
-            //                         "Please input the title of collection!",
-            //                 },
-            //             ]}
-            //         >
-            //             <Input />
-            //         </Form.Item>
-            //         <Form.Item name="description" label="Description">
-            //             <Input type="textarea" />
-            //         </Form.Item>
-
-            //         <Form.Item name="type" label="Type">
-            //             <Radio.Group>
-            //                 <Radio value="public">Public</Radio>
-            //                 <Radio value="private">Private</Radio>
-            //             </Radio.Group>
-            //         </Form.Item>
-            //     </Form>
-            // ),
-        });
-    });
-}
-
-export function applyModal() {
+export function ApplyModal() {
     Modal.confirm({
         title: "Apply server config",
         content:
@@ -79,7 +31,7 @@ export function applyModal() {
     });
 }
 
-export function generateModal(ProfileName: string) {
+export function GenerateModal(ProfileName: string) {
     Modal.confirm({
         title: "Generate " + ProfileName + "'s config",
         content:
@@ -120,7 +72,7 @@ export function generateModal(ProfileName: string) {
     });
 }
 
-export async function deleteModal(ProfileName: string) {
+export async function DeleteModal(ProfileName: string) {
     return new Promise((resolve, reject) => {
         Modal.confirm({
             title: "Delete " + ProfileName,

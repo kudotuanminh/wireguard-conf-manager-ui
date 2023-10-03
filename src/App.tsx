@@ -7,6 +7,9 @@ import {
     Table,
     Tooltip,
     Dropdown,
+    Drawer,
+    Form,
+    Input,
 } from "antd";
 import Icon, { LoadingOutlined, MoreOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
@@ -14,12 +17,11 @@ import { useState, useEffect } from "react";
 import "./App.css";
 import wgBanner from "./assets/wg-full.svg";
 import { HiddenKey } from "./components/HiddenKey";
+import { ApplyModal, GenerateModal, DeleteModal } from "./components/Modal";
 import {
-    generateModal,
-    deleteModal,
-    applyModal,
-    newProfileModal,
-} from "./components/Modal";
+    notificationSuccess,
+    notificationError,
+} from "./components/Notification";
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -71,7 +73,7 @@ function App() {
                                 label: (
                                     <a
                                         onClick={() =>
-                                            generateModal(ProfileName)
+                                            GenerateModal(ProfileName)
                                         }
                                     >
                                         Generate Config
@@ -83,7 +85,7 @@ function App() {
                                 label: (
                                     <a
                                         onClick={async () => {
-                                            await deleteModal(ProfileName);
+                                            await DeleteModal(ProfileName);
                                             fetchUsers();
                                         }}
                                     >
@@ -158,6 +160,55 @@ function App() {
         },
     ];
 
+    const [open, setOpen] = useState(false);
+    const [form] = Form.useForm();
+
+    const showDrawer = () => {
+        setOpen(true);
+    };
+
+    const onClose = () => {
+        setOpen(false);
+    };
+
+    const onFinish = () => {
+        setOpen(false);
+        fetchUsers();
+    };
+
+    const onSubmit = () => {
+        var url = "/api/v1/profiles/new";
+        var data = new FormData();
+        form.validateFields()
+            .then((values) => {
+                data.append("profileName", values.profileName);
+                data.append("clientIP", values.clientIP);
+                data.append("allowedIPs", values.allowedIPs);
+
+                fetch(url, {
+                    method: "POST",
+                    body: data,
+                })
+                    .then(async (res) => {
+                        if (!res.ok) {
+                            const text = await res.json();
+                            throw new Error(text.error.Message);
+                        }
+                        var message = "Creating " + values.profileName;
+                        var description = "This may take a while.";
+                        notificationSuccess(message, description);
+                    })
+                    .catch((err) => {
+                        notificationError(err.toString());
+                    });
+
+                form.submit();
+            })
+            .then(() => {
+                fetchUsers();
+            });
+    };
+
     return (
         <Layout
             style={{
@@ -209,15 +260,13 @@ function App() {
                     <Space style={{ float: "right" }}>
                         <Button
                             type="link"
-                            onClick={async () => {
-                                await newProfileModal().then(() =>
-                                    fetchUsers()
-                                );
+                            onClick={() => {
+                                showDrawer();
                             }}
                         >
                             New Profile
                         </Button>
-                        <Button type="link" onClick={() => applyModal()}>
+                        <Button type="link" onClick={() => ApplyModal()}>
                             Apply
                         </Button>
                     </Space>
@@ -234,6 +283,68 @@ function App() {
                         scroll={{ y: "calc(100vh - 13em)" }}
                     />
                 </Space>
+
+                <Drawer
+                    title="Create a new profile"
+                    width={720}
+                    onClose={onClose}
+                    open={open}
+                    extra={
+                        <Space>
+                            <Button onClick={onClose}>Cancel</Button>
+                            <Button onClick={onSubmit} type="primary">
+                                Create
+                            </Button>
+                        </Space>
+                    }
+                >
+                    <Form form={form} layout="vertical" onFinish={onFinish}>
+                        <Form.Item
+                            name="profileName"
+                            label="Profile Name"
+                            rules={[
+                                {
+                                    required: true,
+                                    message:
+                                        "Please enter a valid Profile Name",
+                                },
+                            ]}
+                        >
+                            <Input allowClear placeholder="Example: minhnt" />
+                        </Form.Item>
+                        <Form.Item
+                            name="clientIP"
+                            label="Client IP"
+                            rules={[
+                                {
+                                    required: true,
+                                    message: "Please enter a valid Client IP",
+                                },
+                            ]}
+                        >
+                            <Input
+                                allowClear
+                                placeholder="Example: 192.168.1.2/32"
+                            />
+                        </Form.Item>
+                        <Form.Item
+                            name="allowedIPs"
+                            label="Allowed IPs"
+                            rules={[
+                                {
+                                    required: true,
+                                    message:
+                                        "Please enter a valid comma-separated list of Allowed IPs",
+                                },
+                            ]}
+                        >
+                            <Input
+                                allowClear
+                                placeholder="Example: 192.168.1.0/24, 192.168.2.0/24"
+                            />
+                        </Form.Item>
+                    </Form>
+                </Drawer>
             </Content>
         </Layout>
     );
