@@ -55,6 +55,10 @@ function App() {
 
     useEffect(() => {
         fetchUsers();
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = "scroll";
+        };
     }, []);
 
     const columns: ColumnType<Client>[] = [
@@ -169,11 +173,6 @@ function App() {
 
     const onClose = () => {
         setOpen(false);
-    };
-
-    const onFinish = () => {
-        setOpen(false);
-        fetchUsers();
     };
 
     const onSubmit = () => {
@@ -298,7 +297,7 @@ function App() {
                         </Space>
                     }
                 >
-                    <Form form={form} layout="vertical" onFinish={onFinish}>
+                    <Form form={form} layout="vertical" onFinish={onClose}>
                         <Form.Item
                             name="profileName"
                             label="Profile Name"
