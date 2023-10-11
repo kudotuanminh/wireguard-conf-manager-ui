@@ -24,9 +24,7 @@ export function ApplyModal() {
                 .catch((err) => {
                     notificationError(err.toString());
                 });
-            return new Promise((resolve) => {
-                setTimeout(resolve, 1000);
-            });
+            return new Promise((resolve) => setTimeout(resolve, 1000));
         },
     });
 }
@@ -65,9 +63,7 @@ export function GenerateModal(ProfileName: string) {
                 .catch((err) => {
                     notificationError(err.toString());
                 });
-            return new Promise((resolve) => {
-                setTimeout(resolve, 1000);
-            });
+            return new Promise((resolve) => setTimeout(resolve, 1000));
         },
     });
 }
@@ -98,9 +94,7 @@ export async function DeleteModal(ProfileName: string) {
                         notificationError(err.toString());
                     });
                 setTimeout(resolve, 1000);
-                return new Promise((resolve) => {
-                    setTimeout(resolve, 1000);
-                });
+                return new Promise((resolve) => setTimeout(resolve, 1000));
             },
             onCancel() {
                 reject();

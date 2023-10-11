@@ -22,6 +22,7 @@ import {
     notificationSuccess,
     notificationError,
 } from "./components/Notification";
+import Search from "antd/es/input/Search";
 
 const { Header, Content } = Layout;
 const { Text } = Typography;
@@ -38,8 +39,11 @@ interface Client {
 
 function App() {
     const [users, setUsers] = useState<Client[]>();
+    const [allUsers, setAllUsers] = useState<Client[]>();
+    const [loading, setLoading] = useState(false);
 
     const fetchUsers = async () => {
+        setLoading(true);
         fetch("/api/v1/profiles", {
             method: "GET",
             headers: {
@@ -50,6 +54,11 @@ function App() {
             .then((res) => res.json())
             .then((body) => {
                 setUsers(body);
+                setAllUsers(body);
+                setLoading(false);
+            })
+            .catch(() => {
+                setLoading(false);
             });
     };
 
@@ -208,6 +217,32 @@ function App() {
             });
     };
 
+    const [searchParam] = useState(["ProfileName", "ClientIP"]);
+
+    const onSearch = async (value: string) => {
+        if (value === "") {
+            setLoading(true);
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            setUsers(allUsers);
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        const filteredData = allUsers?.filter((entry: Client) => {
+            return searchParam.some((newItem: string) => {
+                return (
+                    entry[newItem as keyof Client]
+                        .toString()
+                        .toLowerCase()
+                        .indexOf(value.toLowerCase()) > -1
+                );
+            });
+        });
+        setUsers(filteredData);
+        setLoading(false);
+    };
+
     return (
         <Layout
             style={{
@@ -242,6 +277,10 @@ function App() {
                     <a href="https://github.com/kudotuanminh" target="_blank">
                         @kudotuanminh
                     </a>
+                    {" and "}
+                    <a href="https://github.com/asymme1" target="_blank">
+                        @asymme1
+                    </a>
                 </Text>
             </Header>
 
@@ -256,19 +295,30 @@ function App() {
                         width: "100%",
                     }}
                 >
-                    <Space style={{ float: "right" }}>
-                        <Button
-                            type="link"
-                            onClick={() => {
-                                showDrawer();
+                    <div>
+                        <Search
+                            allowClear
+                            placeholder="Search"
+                            onSearch={onSearch}
+                            style={{
+                                width: 200,
+                                margin: "0 0 0.4em 0.5em",
                             }}
-                        >
-                            New Profile
-                        </Button>
-                        <Button type="link" onClick={() => ApplyModal()}>
-                            Apply
-                        </Button>
-                    </Space>
+                        />
+                        <Space style={{ float: "right" }}>
+                            <Button
+                                type="link"
+                                onClick={() => {
+                                    showDrawer();
+                                }}
+                            >
+                                New Profile
+                            </Button>
+                            <Button type="link" onClick={() => ApplyModal()}>
+                                Apply
+                            </Button>
+                        </Space>
+                    </div>
                     <Table
                         dataSource={users}
                         columns={columns}
@@ -276,10 +326,10 @@ function App() {
                             indicator: (
                                 <LoadingOutlined style={{ fontSize: 72 }} />
                             ),
-                            spinning: users === undefined,
+                            spinning: loading,
                         }}
                         pagination={false}
-                        scroll={{ y: "calc(100vh - 13em)" }}
+                        scroll={{ y: "calc(100vh - 13.7em)" }}
                     />
                 </Space>
 
